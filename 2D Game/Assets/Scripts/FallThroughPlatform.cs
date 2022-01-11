@@ -39,6 +39,10 @@ public class FallThroughPlatform : MonoBehaviour
             effector.rotationalOffset = 0f;
         }
 
+        if (Input.GetKey(KeyCode.W))
+        {
+            effector.rotationalOffset = 0f;
+        }
 
     }
 }
