@@ -6,11 +6,13 @@ public class PlayerStats : MonoBehaviour
 {
     [SerializeField]
     private Image health_Stats, stamina_Stats;
-
+    public float damage = 20f;
     public float health = 100f;
-    public float damage = 15f;
+    
+  
+    
     // Start is called before the first frame update
-    public void applyDamage()
+     public void applyDamage(float damage)
     {
         health -= damage;
     }
@@ -21,7 +23,7 @@ public class PlayerStats : MonoBehaviour
         Display_HealthStats(health);
         if (Input.GetKeyDown(KeyCode.P))
         {
-            applyDamage();
+            applyDamage(damage);
         }
     }
 
