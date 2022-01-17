@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 
 public class Movement : MonoBehaviour
@@ -29,16 +31,31 @@ public class Movement : MonoBehaviour
     bool isDashing;
     float doubleTapTime;
     KeyCode lastKeyCode;
-   
+
+    [SerializeField] private LayerMask Ground;
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private int cherries = 0;
+    [SerializeField] private Text cherryText;
+    [SerializeField] private float hurtForce = 10f;
+    [SerializeField] private AudioSource cherry;
+    [SerializeField] private AudioSource walking;
+    [SerializeField] private AudioSource jumping;
+    [SerializeField] private AudioSource hurt;
+    [SerializeField] private AudioSource powerup;
+    [SerializeField] private AudioSource speedup;
+    [SerializeField] private int health;
+    [SerializeField] private Text healthAmount;
+
     //newDash
-   // private int direction;
+    // private int direction;
     private float dashTime;
     public float startDashTime;
     private float dashSpeed;
     public GameObject dashEffect;
 
 
-    private enum MovementState { idle, running, jumping, falling, disappear, attacking }
+    private enum MovementState { idle, running, jumping, falling, disappear, attacking, hurt }
 
     private void Start()
     {
@@ -173,11 +190,12 @@ public class Movement : MonoBehaviour
             {
                 //Dash
                 StartCoroutine(Dash(-1f));
+                Debug.Log("Test");
             }
 
             else
-           {
-                doubleTapTime = Time.time + 2f;
+            {
+                doubleTapTime = Time.time + 0.2f;
             }
 
             lastKeyCode = KeyCode.A;
@@ -194,7 +212,7 @@ public class Movement : MonoBehaviour
 
             else
             {
-                doubleTapTime = Time.time + 2f;
+                doubleTapTime = Time.time + 0.2f;
             }
 
             lastKeyCode = KeyCode.D;
@@ -282,6 +300,16 @@ public class Movement : MonoBehaviour
                  anim.SetBool("attack", true);
                   anim.SetBool("idle", false);
             }
+        
+        
+            if(state == MovementState.hurt)
+            {
+                anim.SetBool("run", false);
+                anim.SetBool("jump", false);
+                anim.SetBool("attack", false);
+                anim.SetBool("idle", false);
+                anim.SetBool("hurt", true);
+            }
         }
         /*void OnTriggerEnter2D(Collider2D collision)
         {
@@ -297,9 +325,10 @@ public class Movement : MonoBehaviour
         isDashing = true;
         rb2.velocity = new Vector2(rb2.velocity.x, 0f);
         rb2.AddForce(new Vector2(dashDistance * direction, 0f), ForceMode2D.Impulse);
+            Debug.Log(dashDistance);
         float gravity = rb2.gravityScale;
        // Instantiate(dashEffect, transform.position, Quaternion.identity);
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(2f);
         isDashing = false;
         rb2.gravityScale = gravity;
        // Object.Destroy(dashEffect);
@@ -307,4 +336,82 @@ public class Movement : MonoBehaviour
 
     }
 
+
+
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        EnemyAI Enemy = other.gameObject.GetComponent<EnemyAI>();
+
+
+        if (other.gameObject.tag == "Enemy")
+        {
+
+            
+            EnemyAI Troll = other.gameObject.GetComponent<EnemyAI>();
+
+            if (state == MovementState.falling)
+            {
+                
+                
+                Troll.JumpedOn();
+                Jump();
+            }
+            else
+            {
+                hurt.Play(); // Deals with health and Updates UI if health is too low
+                state = MovementState.hurt;
+                health -= 25;
+                healthAmount.text = health.ToString();
+                if (health <= 0)
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                }
+
+                if (other.gameObject.transform.position.x > transform.position.x)
+                {
+                    //Enemy is to my right therefore should be damaged and move left
+                    rb2.velocity = new Vector2(-hurtForce, rb2.velocity.y);
+                }
+                if (other.gameObject.tag == "EnemyAI")
+                {
+                    if (state == MovementState.falling)
+                    {
+                      //  hurt.Play();
+                     //   eagle.JumpedOn();
+                     //   possum.JumpedOn();
+                        Jump();
+                    }
+                    else
+                    {
+                        hurt.Play(); // Deals with health and Updates UI if health is too low
+                        state = MovementState.hurt;
+                        health -= 25;
+                        healthAmount.text = health.ToString();
+                        if (health <= 0)
+                        {
+                            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                        }
+                        else
+                        {
+                            //Enemy is to my left therefore i Should be damaged and move right
+                            rb2.velocity = new Vector2(hurtForce, rb2.velocity.y);
+                        }
+                    }
+
+                }
+                else
+                {
+                    //Enemy is to my left therefore i Should be damaged and move right
+                    rb2.velocity = new Vector2(hurtForce, rb2.velocity.y);
+                }
+
+            }
+
+        }
+    }
+
+
+
+    
 }

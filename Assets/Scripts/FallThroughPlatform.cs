@@ -5,16 +5,30 @@ using UnityEngine;
 public class FallThroughPlatform : MonoBehaviour
 {
     private PlatformEffector2D effector;
+    private Rigidbody2D rb;
     public float wait;
+    [SerializeField] bool willFall;
+    [SerializeField] Transform Feet;
+    [SerializeField] LayerMask Falling;
+    private RigidbodyConstraints2D constraints;
+    private Collider2D coll;
+    private Collider2D coll2;
+    public GameObject WillFall;
+    public bool isStatic;
+
 
     void Start()
     {
         effector = GetComponent<PlatformEffector2D>();
+        rb = GetComponent<Rigidbody2D>();
+        coll = GetComponent<Collider2D>();
+        coll2 = GetComponentInChildren<Collider2D>();
+
     }
 
     void Update()
     {
-        if(Input.GetKeyUp(KeyCode.DownArrow))
+        if (Input.GetKeyUp(KeyCode.DownArrow))
         {
             wait = 0.1f;
             effector.rotationalOffset = 0f;
@@ -43,6 +57,51 @@ public class FallThroughPlatform : MonoBehaviour
         {
             effector.rotationalOffset = 0f;
         }
+        
+       
+        
+
+           
 
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (Physics2D.OverlapCircle(Feet.position, 0.5f, Falling))
+        {
+            willFall = true;
+            StartCoroutine(Fall(willFall));
+        }
+
+        if (collision.gameObject.CompareTag("DestroyPlat"))
+        {
+            Destroy(this.gameObject);
+        }
+              
+
+    }
+    private IEnumerator Fall(bool willFall)
+    {
+        
+        if(isStatic == false)
+        {
+
+          if(willFall == true)
+          {
+                yield return new WaitForSeconds(0.8f);
+                coll.isTrigger = true;
+                coll2.isTrigger = true;
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                WillFall.SetActive(false);
+
+          }
+
+        }
+        
+
+    }
+
 }
+
+
+
