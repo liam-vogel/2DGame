@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class EnemyAI : MonoBehaviour
 {
+    public float damage = 20f;
     //waypoints should have a minimum of 2 to move between.
     public List<Transform> points;
     public int nextID = 0;

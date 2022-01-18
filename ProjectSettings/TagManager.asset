@@ -8,6 +8,7 @@ TagManager:
   - Block
   - falling
   - DestroyPlat
+  - Enemy
   layers:
   - Default
   - TransparentFX
