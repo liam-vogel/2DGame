@@ -24,26 +24,73 @@ public class Movement : MonoBehaviour
     [SerializeField] LayerMask Groundlayer;
     bool isGrounded;
     public int extraJumps = 1;
-    public int jumpsCount;
-    public float jumpCoolDown;
-
-    public float dashDistance = 15f;
-    bool isDashing;
-    float doubleTapTime;
-    KeyCode lastKeyCode;
-
-    private float hurtForce = 10f;
-    private Text healthAmount;
+    private int jumpsCount;
+    private float jumpCoolDown;
     public float health;
     public float damage;
+    private float Edamage;
     public GameObject Player;
     [SerializeField]
     private Image health_Stats;
+    private float nextAttackTime = 0f;
+    public Transform attackPoint;
+    public float attackRange;
+    public float attackRate;
+    public LayerMask enemyLayers;
+    private float nextHitTime = 0f;
 
 
-    public void applyDamage(float damage)
+    void Update()
     {
-        health -= damage;
+        dirX = Input.GetAxisRaw("Horizontal");
+        Display_HealthStats(health);
+
+        if (Input.GetButtonDown("Jump"))
+            Jump();
+
+
+        UpdateAnimationState();
+        AnimationChange();
+        CheckGrounded();
+
+    }
+
+
+    void FixedUpdate()
+    {
+
+        rb2.velocity = new Vector2(dirX * playerMoveSpeed, rb2.velocity.y);
+    }
+
+
+
+
+    private void OnDrawGizmosSelected()
+    {
+        if(attackPoint == null)
+        {
+            return;
+        }
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
+    void Attack()
+   {
+        anim.SetTrigger("Attack");
+
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            enemy.GetComponent<EnemyAI>().TakeDamage(damage);
+        }
+
+           
+    
+    
+    }
+    public void applyDamage(float Edamage)
+    {
+        health -= Edamage;
     }
 
     public void Display_HealthStats(float health)
@@ -102,121 +149,110 @@ public class Movement : MonoBehaviour
 
     }
 
-    private void FixedUpdate()
+
+    void AnimationChange()
     {
- 
-            rb2.velocity = new Vector2(dirX * playerMoveSpeed, rb2.velocity.y);
+        if (state == MovementState.idle)
+        {
+            anim.SetBool("run", false);
+            anim.SetBool("jump", false);
+            anim.SetBool("idle", true);
+
+        }
+
+        if (state == MovementState.running)
+        {
+            anim.SetBool("run", true);
+            anim.SetBool("jump", false);
+            anim.SetBool("idle", false);
+
+        }
+
+        if (state == MovementState.jumping)
+        {
+            anim.SetBool("run", false);
+            anim.SetBool("jump", true);
+            anim.SetBool("idle", false);
+
+        }
+
+
+
+        if (state == MovementState.attacking)
+        {
+            anim.SetBool("run", false);
+            anim.SetBool("jump", false);
+
+            anim.SetBool("idle", false);
+        }
+
+
+        if (state == MovementState.hurt)
+        {
+            anim.SetBool("run", false);
+            anim.SetBool("jump", false);
+
+            anim.SetBool("idle", false);
+            anim.SetBool("hurt", true);
+        }
     }
 
-    void Update()
+
+    void UpdateAnimationState()
     {
-        dirX = Input.GetAxisRaw("Horizontal");
-        Display_HealthStats(health);
-
-        if (Input.GetButtonDown("Jump"))
-            Jump();
-
-
-        UpdateAnimationState();
-        AnimationChange();
-        CheckGrounded();
-        
-  
-        
-        void UpdateAnimationState()
+        if(Time.time >= nextAttackTime)
         {
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Attack();
+                nextAttackTime = Time.time + 1f / attackRate;
+            }
+        }
+       
 
-           if(Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                anim.SetTrigger("Attack");
-            }
-                
+
+        if (dirX > 0f)
+        {
+            state = MovementState.running;
+            sprite.flipX = false;
+            knight.transform.localScale = new Vector3(-1, 1, 1);
+
+        }
+        else if (dirX < 0)
+        {
+            state = MovementState.running;
+            sprite.flipX = true;
+            knight.transform.localScale = new Vector3(1, 1, 1);
+
+        }
+
+        else
+        {
+            state = MovementState.idle;
+
+        }
+        if (rb2.velocity.y > .1f)
+        {
+            state = MovementState.jumping;
+        }
+        else if (rb2.velocity.y < -.1f)
+        {
+            // state = MovementState.falling;
+        }
+        
+        
+       
+
+ 
             
-            if (dirX > 0f)
-            {
-                state = MovementState.running;
-                sprite.flipX = false;
-                knight.transform.localScale = new Vector3(-1, 1, 1);
-                // anim.SetBool("idle", false);
-                // anim.SetBool("run", true);
-            }
-            else if (dirX < 0)
-            {
-                state = MovementState.running;
-                sprite.flipX = true;
-                knight.transform.localScale = new Vector3(1, 1, 1);
-                //anim.SetBool("idle", false);
-                // anim.SetBool("run", true);
-            }
-            
-            else
-            {
-                state = MovementState.idle;
-                //anim.SetBool("idle", true);
-            }
-            if (rb2.velocity.y > .1f)
-            {
-                state = MovementState.jumping;
-            }
-            else if (rb2.velocity.y < -.1f)
-            {
-                // state = MovementState.falling;
-            }
-            //  anim.SetInteger("state", (int)state);
 
           
 
 
-        }
-
-        void AnimationChange()
-        {
-            if (state == MovementState.idle)
-            {
-                anim.SetBool("run", false);
-                anim.SetBool("jump", false);
-                //anim.SetBool("fall", false);
-                anim.SetBool("idle", true);
-            }
-
-            if (state == MovementState.running)
-            {
-                anim.SetBool("run", true);
-                anim.SetBool("jump", false);
-                // anim.SetBool("fall", false);
-                anim.SetBool("idle", false);
-            }
-
-            if (state == MovementState.jumping)
-            {
-                anim.SetBool("run", false);
-                anim.SetBool("jump", true);
-                // anim.SetBool("fall", false);
-                anim.SetBool("idle", false);
-            }
-
-
-
-            if (state == MovementState.attacking)
-            {
-                  anim.SetBool("run", false);
-                  anim.SetBool("jump", false);
-                 anim.SetBool("attack", true);
-                  anim.SetBool("idle", false);
-            }
-        
-        
-            if(state == MovementState.hurt)
-            {
-                anim.SetBool("run", false);
-                anim.SetBool("jump", false);
-                anim.SetBool("attack", false);
-                anim.SetBool("idle", false);
-                anim.SetBool("hurt", true);
-            }
-        }
-        
     }
+
+
+    
 
 
 
@@ -229,87 +265,36 @@ public class Movement : MonoBehaviour
     {
         EnemyAI Enemy = other.gameObject.GetComponent<EnemyAI>();
         EnemyAI enemyAI = Enemy.GetComponent<EnemyAI>();
-        damage = enemyAI.damage;
-        
+        Edamage = enemyAI.damage;
+
 
 
         if (other.gameObject.CompareTag("Enemy"))
         {
-           
-           EnemyAI Troll = other.gameObject.GetComponent<EnemyAI>();
 
-            StartCoroutine(Damage());
-            Debug.Log("EDetect");
-
+            EnemyAI Troll = other.gameObject.GetComponent<EnemyAI>();
+           // if(Time.time >= nextHitTime)
+           // {
+                applyDamage(Edamage);
+                //nextHitTime = Time.time + 0.6f;
+           // }
             
 
 
-            if (state == MovementState.falling)
-            {
-                
-                
-                Troll.JumpedOn();
-                Jump();
-            }
-            else
-            {
-                // Deals with health and Updates UI if health is too low
-              
-
-                if (other.gameObject.transform.position.x > transform.position.x)
-                {
-                    //Enemy is to my right therefore should be damaged and move left
-                    rb2.velocity = new Vector2(-hurtForce, rb2.velocity.y);
-                }
-                if (other.gameObject.tag == "EnemyAI")
-                {
-                    if (state == MovementState.falling)
-                    {
-                      //  hurt.Play();
-                     //   eagle.JumpedOn();
-                     //   possum.JumpedOn();
-                        Jump();
-                    }
-                    else
-                    {
-                       // Deals with health and Updates UI if health is too low
-                        state = MovementState.hurt;
-                        health -= 25;
-                        healthAmount.text = health.ToString();
-                        if (health <= 0)
-                        {
-                            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-                        }
-                        else
-                        {
-                            //Enemy is to my left therefore i Should be damaged and move right
-                            rb2.velocity = new Vector2(hurtForce, rb2.velocity.y);
-                        }
-                    }
-
-                }
-                else
-                {
-                    //Enemy is to my left therefore i Should be damaged and move right
-                    rb2.velocity = new Vector2(hurtForce, rb2.velocity.y);
-                }
-
-            }
-
         }
-    }
+        else
+        {
+          
 
 
-    IEnumerator Damage()
-        
-    {
-
-        applyDamage(damage);
-        yield return new WaitForSeconds(0.4f);
-        
+           
+        }
 
     }
+}
 
 
     
-}
+
+
+    

@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class EnemyAI : MonoBehaviour
 {
+    public float MaxHealth = 100f;
+    public float currentHealth;
     public float damage = 20f;
     //waypoints should have a minimum of 2 to move between.
     public List<Transform> points;
@@ -16,6 +18,8 @@ public class EnemyAI : MonoBehaviour
     private Rigidbody2D rb2;
     private Animator anim;
 
+
+
     private enum MovementState { disappear }
 
     // Start is called before the first frame update
@@ -23,6 +27,7 @@ public class EnemyAI : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         rb2 = GetComponent<Rigidbody2D>();
+        currentHealth = MaxHealth;
     }
 
     private void Reset()
@@ -98,13 +103,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            //deathanim();
-        }
-    }
+    
 
     private void deathanim()
     {
@@ -116,6 +115,14 @@ public class EnemyAI : MonoBehaviour
     {
         anim.SetTrigger("Death");
        // explosion.Play();
+    }
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if(currentHealth <= 0)
+        {
+            Die();
+        }
     }
     private void Die()
     {
