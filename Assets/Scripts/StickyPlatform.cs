@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class StickyPlatform : MonoBehaviour
 {
+
+    
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.name == "Player") //change to whatever your player is
@@ -19,4 +21,8 @@ public class StickyPlatform : MonoBehaviour
             collision.gameObject.transform.SetParent(null);
         }
     }
+
+
+   
+
 }

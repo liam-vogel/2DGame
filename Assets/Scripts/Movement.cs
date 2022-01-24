@@ -28,7 +28,7 @@ public class Movement : MonoBehaviour
     private float jumpCoolDown;
     public float health;
     public float damage;
-    private float Edamage;
+    private float Edamage = 10f;
     public GameObject Player;
     [SerializeField]
     private Image health_Stats;
@@ -55,6 +55,14 @@ public class Movement : MonoBehaviour
 
     }
 
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("spikes"))
+        {
+            applyDamage(Edamage);
+        }
+    }
 
     void FixedUpdate()
     {

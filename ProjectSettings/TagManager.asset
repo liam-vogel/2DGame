@@ -9,6 +9,7 @@ TagManager:
   - falling
   - DestroyPlat
   - Enemy
+  - spikes
   layers:
   - Default
   - TransparentFX
