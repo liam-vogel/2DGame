@@ -55,17 +55,19 @@ public class Movement : MonoBehaviour
         UpdateAnimationState();
         AnimationChange();
         CheckGrounded();
-        Pdie();
+        StartCoroutine(Pdie());
       
             
 
     }
 
 
-    private void Pdie()
+    private IEnumerator Pdie()
      {
         if (health <= 0)
         {
+            anim.SetBool("die", true);
+            yield return new WaitForSeconds(0.5f); 
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
