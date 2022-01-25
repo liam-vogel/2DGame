@@ -9,7 +9,8 @@ using UnityEngine.SceneManagement;
 public class Movement : MonoBehaviour
 {
     private Rigidbody2D rb2;
-    private CapsuleCollider2D coll;
+    private BoxCollider2D coll;
+    private BoxCollider2D collT;
     private SpriteRenderer sprite;
     private Animator anim;
     private GameObject knight;
@@ -37,7 +38,9 @@ public class Movement : MonoBehaviour
     public float attackRange;
     public float attackRate;
     public LayerMask enemyLayers;
-    private float nextHitTime = 0f;
+    private GameObject Enemy;
+    private GameObject EnemyAI;
+   
 
 
     void Update()
@@ -52,15 +55,18 @@ public class Movement : MonoBehaviour
         UpdateAnimationState();
         AnimationChange();
         CheckGrounded();
+        Pdie();
+      
+            
 
     }
 
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.CompareTag("spikes"))
+    private void Pdie()
+     {
+        if (health <= 0)
         {
-            applyDamage(Edamage);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 
@@ -116,11 +122,13 @@ public class Movement : MonoBehaviour
     private void Start()
     {
         rb2 = GetComponent<Rigidbody2D>();
-        coll = GetComponent<CapsuleCollider2D>();
+        coll = GetComponent<BoxCollider2D>();
+        collT = GetComponent<BoxCollider2D>();
         sprite = GetComponentInChildren<SpriteRenderer>();
         anim = GetComponentInChildren<Animator>();
         knight = GameObject.Find("sword_man");
         Cursor.visible = false;
+       
     }
 
   
@@ -280,22 +288,22 @@ public class Movement : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy"))
         {
 
-            EnemyAI Troll = other.gameObject.GetComponent<EnemyAI>();
-           // if(Time.time >= nextHitTime)
-           // {
-                applyDamage(Edamage);
-                //nextHitTime = Time.time + 0.6f;
-           // }
-            
+            //EnemyAI Troll = other.gameObject.GetComponent<EnemyAI>();
+            // if(Time.time >= nextHitTime)
+            // {
+            applyDamage(Edamage);
+            //nextHitTime = Time.time + 0.6f;
+            // }
+
 
 
         }
-        else
+        else if (other.gameObject.CompareTag("spikes")) 
         {
-          
+            applyDamage(Edamage);
 
 
-           
+
         }
 
     }
