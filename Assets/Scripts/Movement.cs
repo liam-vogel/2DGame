@@ -146,7 +146,7 @@ public class Movement : MonoBehaviour
 
     private void CheckGrounded()
     {
-        if (Physics2D.OverlapCircle(Feet.position, 0.5f, Groundlayer))
+        if (Physics2D.OverlapCircle(Feet.position, 0.1f, Groundlayer))
 
         {
             isGrounded = true;

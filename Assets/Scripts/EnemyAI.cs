@@ -75,12 +75,12 @@ public class EnemyAI : MonoBehaviour
         //flip transform to change sprite
         if(nextGoal.transform.position.x > transform.position.x)
         {
-            transform.localScale = new Vector3(-.75f, .75f, 1);
+            transform.localScale = new Vector3(-1.5f, 1.5f,1);
             // used to be Vector3(-1, 1, 1)
         }
         else
         {
-            transform.localScale = new Vector3(.75f, .75f, 1);
+            transform.localScale = new Vector3(1.5f, 1.5f, 1);
             // used to be Vector3(1, 1, 1)
         }
         //move the enemy towards next waypoint
